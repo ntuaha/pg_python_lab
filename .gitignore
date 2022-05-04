@@ -1,4 +1,5 @@
 passwd
+gcp_db.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
