@@ -53,3 +53,9 @@ create UNLOGGED table if not exists lab.t1(
     a8 real
 );
 ```
+
+## 放入資料
+
+```shell
+python3 init_db.py
+```

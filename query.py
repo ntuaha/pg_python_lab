@@ -12,7 +12,6 @@ from sqlalchemy import create_engine
 import io
 import tempfile
 from memory_tempfile import MemoryTempfile
-import tempfile
 
 
 def profile(fn):
@@ -77,6 +76,7 @@ def read_sql_tmpfile_df_arrow(query="SELECT * from lab.t1"):
         logging.info(df.shape)
         return
 
+
 @profile
 def read_sql_tmpfile_df(query="SELECT * from lab.t1"):
     #f = open('tt.csv','wb')
@@ -101,7 +101,9 @@ def read_sql_tmpfile_df(query="SELECT * from lab.t1"):
         logging.info(df.shape)
         return
 
+
 import pyarrow.csv
+
 
 @profile
 def read_sql_tmpfile_df_arrow2(query="SELECT * from lab.t1"):
