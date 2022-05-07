@@ -7,6 +7,7 @@ import numpy as np
 import logging
 import time
 import numba
+import datetime
 
 warnings.filterwarnings("ignore")
 logging.basicConfig(level=logging.DEBUG,
@@ -69,30 +70,38 @@ def numba_vec_core(x, y):
 def numba_vec(df):
     return numba_vec_core(df['A'].to_numpy(), df['B'].to_numpy())
 
-
+# 必須將運算過程用 python 原始運算子寫出，不能呼叫函數
 @numba.jit(nogil=True)
-def numba_jit_core(x, y):
-    n = len(x)
+def numba_jit_nogil_core(a, b):
+    if b == 0:
+        return 0.0
+    return float(a) / b
+
+def numba_jit_nogil(df):
+    n = len(df)
+    x = df['A'].to_numpy()
+    y = df['B'].to_numpy()
     result = np.empty(n, dtype='float64')
-    for i in range(len(x)):
-        result[i] = main_task(x[i], y[i])
+    for i in range(n):
+        result[i] = numba_jit_nogil_core(x[i], y[i])
     return result
+    
+# 必須將運算過程用 python 原始運算子寫出，不能呼叫函數
+@numba.jit(parallel=True)
+def numba_jit_parallel_core(a, b):
+    if b == 0:
+        return 0.0
+    return float(a) / b
 
 
-def numba_jit(x, y):
-    return numba_jit_core(df['A'].to_numpy(), df['B'].to_numpy())
-
-@numba.jit(nogil=True,parallel=True)
-def numba_jit_parallel_core(x, y):
-    n = len(x)
+def numba_jit_parallel(df):
+    n = len(df)
+    x = df['A'].to_numpy()
+    y = df['B'].to_numpy()
     result = np.empty(n, dtype='float64')
-    for i in range(len(x)):
-        result[i] = main_task(x[i], y[i])
+    for i in range(n):
+        result[i] = numba_jit_parallel_core(x[i], y[i])
     return result
-
-
-def numba_jit_parallel(x, y):
-    return numba_jit_parallel_core(df['A'].to_numpy(), df['B'].to_numpy())
 
 
 def main():
@@ -111,25 +120,23 @@ def main():
     iterrows,
     np_vec,
 #    dask_apply2,
-    dask_apply,
+#    dask_apply,
     numba_vec,
-    numba_jit,
-    #numba_jit_parallel
+    numba_jit_nogil,
+    numba_jit_parallel
 #    swifter_apply]
     ]
     logging.info('start...')
     t= time.perf_counter()
-    out= perfplot.show(
+    out= perfplot.bench(
         setup=lambda n: pd.concat([df] * n, ignore_index=True),
         kernels=kernels,
         labels=[str(k.__name__) for k in kernels],
-        n_range=[10**k for k in range(3)],
-        xlabel='N',
-        logx=True,
-        logy=True)
+        n_range=[10**k for k in range(6)],
+        xlabel='N')
     logging.info(f"process time:\t{(time.perf_counter()-t):0.4f}")
     out.show()
-    out.save(f"fig/apply_lab3_{datetime.datetime.now().strftime('%Y%m%dH%H%M%sz')}.png", transparent=True, bbox_inches="tight")
+    out.save(f"fig/apply_lab3_{datetime.datetime.now().strftime('%Y%m%dH%H%M%Sz')}.png", transparent=True, bbox_inches="tight")
 
 if __name__ == "__main__":
     main()
