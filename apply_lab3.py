@@ -135,7 +135,7 @@ def main():
         n_range=[10**k for k in range(6)],
         xlabel='N')
     logging.info(f"process time:\t{(time.perf_counter()-t):0.4f}")
-    out.show()
+    # out.show()
     out.save(f"fig/apply_lab3_{datetime.datetime.now().strftime('%Y%m%dH%H%M%Sz')}.png", transparent=True, bbox_inches="tight")
 
 if __name__ == "__main__":
